@@ -4,9 +4,13 @@
 #include "leptjson.h"
 
 static int main_ret = 0;
-static int test_count = 0;
-static int test_pass = 0;
+static int test_count = 0;  // 测试总数
+static int test_pass = 0;   // 通过总数
 
+// equality表示expect与actual是否相等，format用来打印错误信息
+// 表示将测试文件的绝对路径、测试文件的代码行数、预期值、实际值给打印出来
+// fprintf(stderr, "%s:%d: expect: " format " actual: " format "\n", __FILE__, __LINE__, expect, actual);
+// 宏中的反斜线表示该行未结束，还会串接到下一行
 #define EXPECT_EQ_BASE(equality, expect, actual, format) \
     do {\
         test_count++;\
@@ -18,6 +22,7 @@ static int test_pass = 0;
         }\
     } while(0)
 
+// 使用这个宏时，若expect!=actual，便会输出错误信息
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 
 static void test_parse_null() {

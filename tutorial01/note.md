@@ -42,7 +42,10 @@ JSON（JavaScript Object Notation）是一个用于数据交换的文本格式�
 3. 把数据结构转换成 JSON 文本（stringify）。
 
 ![图片](https://github.com/yanfengneng/json/blob/master/tutorial01/image/requirement.png)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 添加注解
 # 2 单元测试
 
 很多时候我们在做练习题时，都是以 printf／cout 打印结果，再用肉眼对比结果是否乎合预期。但当软件项目越来越复杂，这个做法会越来越低效。一般我们会采用自动的测试方式，例如单元测试（unit testing）。单元测试也能确保其他人修改代码后，原来的功能维持正确（这称为回归测试／regression testing）。

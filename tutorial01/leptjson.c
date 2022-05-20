@@ -4,10 +4,12 @@
 
 #define EXPECT(c, ch)       do { assert(*c->json == (ch)); c->json++; } while(0)
 
+// 为了减少解析函数之间传递多个参数，将所有数据都放进这个结构体内
 typedef struct {
     const char* json;
 }lept_context;
 
+// 过滤掉json字符串中的空白，即空格符、制表符、换行符、回车符
 static void lept_parse_whitespace(lept_context* c) {
     const char *p = c->json;
     while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
@@ -52,6 +54,8 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
     }
 }
 
+// 解析json
+// 若lept_parse()失败，会把v设为null类型，所以这里先把它设为null，让lept_parse_value()写入解析出来的根值。
 int lept_parse(lept_value* v, const char* json) {
     lept_context c;
     int ret;
