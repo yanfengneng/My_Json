@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "gcc", // 写c用gcc；写c++用g++
+            "args": [
+                "${fileDirname}/*.c", //写c++把 *.c 换成 *.cpp；linux中使用 / 来分割，windows中使用 \ 来分割
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}",// 这里是生成可执行文件名，使用的是源文件的名字
+                "-g",
+                "-Wall", 
+                "-static-libgcc",   
+                "-fexec-charset=GBK",
+                "-std=c11", // 使用c语言的标准
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "run",
+            "type": "shell",
+            "dependsOn": "build",
+            "command": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            }
+        }
+
+    ]
+}

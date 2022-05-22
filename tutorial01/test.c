@@ -25,6 +25,7 @@ static int test_pass = 0;   // 通过总数
 // 使用这个宏时，若expect!=actual，便会输出错误信息
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 
+// 测试null
 static void test_parse_null() {
     lept_value v;
     v.type = LEPT_FALSE;
@@ -32,6 +33,7 @@ static void test_parse_null() {
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 }
 
+// 测试true
 static void test_parse_true() {
     lept_value v;
     v.type = LEPT_FALSE;
@@ -39,6 +41,7 @@ static void test_parse_true() {
     EXPECT_EQ_INT(LEPT_TRUE, lept_get_type(&v));
 }
 
+// 测试false
 static void test_parse_false() {
     lept_value v;
     v.type = LEPT_TRUE;
@@ -46,6 +49,7 @@ static void test_parse_false() {
     EXPECT_EQ_INT(LEPT_FALSE, lept_get_type(&v));
 }
 
+// 测试有效状态
 static void test_parse_expect_value() {
     lept_value v;
 
@@ -58,6 +62,7 @@ static void test_parse_expect_value() {
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 }
 
+// 测试无效状态
 static void test_parse_invalid_value() {
     lept_value v;
     v.type = LEPT_FALSE;
@@ -69,6 +74,7 @@ static void test_parse_invalid_value() {
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 }
 
+// 测试空白之后还有字符的状态
 static void test_parse_root_not_singular() {
     lept_value v;
     v.type = LEPT_FALSE;
@@ -76,6 +82,7 @@ static void test_parse_root_not_singular() {
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 }
 
+// 测试所有的函数
 static void test_parse() {
     test_parse_null();
     test_parse_true();
@@ -88,5 +95,6 @@ static void test_parse() {
 int main() {
     test_parse();
     printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
+    puts("hello world!");
     return main_ret;
 }
