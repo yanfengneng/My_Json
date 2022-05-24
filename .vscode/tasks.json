@@ -1,3 +1,4 @@
+// 此文件主要是编译.c或.cpp文件用的命令
 {
     "version": "2.0.0",
     "tasks": [
@@ -5,44 +6,37 @@
             "label": "build",
             "type": "shell",
             "command": "gcc", // 写c用gcc；写c++用g++
-            "args": [
+            "args": [// 编译参数，shell命令
                 "${fileDirname}/*.c", //写c++把 *.c 换成 *.cpp；linux中使用 / 来分割，windows中使用 \ 来分割
-                "-o",
+                "-o",//指定输出文件的路径和名称
                 "${fileDirname}/${fileBasenameNoExtension}",// 这里是生成可执行文件名，使用的是源文件的名字
-                "-g",
-                "-Wall", 
-                "-static-libgcc",   
-                "-fexec-charset=GBK",
+                "-g", //生成和调试有关的信息
+                "-Wall", // 开启额外警告
+                "-static-libgcc",   // 静态链接libgcc
+                "-fexec-charset=GBK",// 生成的程序使用GBK编码，不加这一条会导致Win下输出中文乱码
                 "-std=c11", // 使用c语言的标准
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
+            "group": { //group表示‘组’，我们可以有很多的task，然后把他们放在一个‘组’里
+                "kind": "build",//表示这一组任务类型是构建
+                "isDefault": true//表示这个任务是当前这组任务中的默认任务
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "new"
+                "echo": true,//表示在执行任务时在终端要有输出
+                "reveal": "always",//执行任务时是否跳转到终端面板，可以为always，silent，never
+                "focus": false,//设为true后可以使执行task时焦点聚集在终端，但对编译来说，设为true没有意义，因为运行的时候才涉及到输入
+                "panel": "new"//每次执行这个task时都新建一个终端面板，也可以设置为shared，共用一个面板，不过那样会出现‘任务将被终端重用’的提示，比较烦人
             },
-            "problemMatcher": "$gcc"
+            "problemMatcher": "$gcc"//捕捉编译时编译器在终端里显示的报错信息，将其显示在vscode的‘问题’面板里
         },
-        {
+        {//这个大括号里是‘运行(run)’任务，一些设置与上面的构建任务性质相同
             "label": "run",
             "type": "shell",
-            "dependsOn": "build",
-            "command": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "dependsOn": "build",//任务依赖，因为要运行必须先构建，所以执行这个任务前必须先执行build任务
+            "command": "${fileDirname}/${fileBasenameNoExtension}",//执行exe文件，只需要指定这个exe文件在哪里就好
             "group": {
-                "kind": "test",
+                "kind": "test",//这一组是‘测试’组，将run任务放在test组里方便我们用快捷键执行
                 "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "new"
             }
         }
-
     ]
 }
