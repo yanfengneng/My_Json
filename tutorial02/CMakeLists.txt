@@ -6,7 +6,7 @@ project (leptjson_test C)
 
 # 设置gcc编译选项，并开启警告wall
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi -pedantic -Wall")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 endif()
 
 # 生成库文件 (需要生成的库文件名 源文件...)
