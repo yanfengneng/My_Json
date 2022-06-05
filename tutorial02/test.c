@@ -82,6 +82,7 @@ static void test_parse_number() {
     TEST_NUMBER(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
+// 使用宏来将不合法的json值得相似代码简化掉
 #define TEST_ERROR(error, json)\
     do {\
         lept_value v;\
