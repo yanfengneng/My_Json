@@ -4,9 +4,9 @@
 #ifndef LEPTJSON_H__
 #define LEPTJSON_H__
 
-// 我们要解析的 JSON 文件中有6中数据类型，如果把 true 和 false 当作两种类型就是 7 种了，因此声明一个枚举类型
+// 我们要解析的 JSON 文件中有 6 种数据类型，如果把 true 和 false 当作两种类型就是 7 种了，因此声明一个枚举类型
 // 由于 C 语言没有 C++ 的命名空间，因此一般会使用项目的简写作为标识符的前缀。通常枚举值用全大写，而类型及函数则用小写。
-// 枚举值是常量，默认依次从0开始赋值
+// 枚举值是常量，默认依次从 0 开始赋值
 typedef enum { 
     LEPT_NULL, LEPT_FALSE, LEPT_TRUE, LEPT_NUMBER, LEPT_STRING, LEPT_ARRAY, LEPT_OBJECT 
 }lept_type;
