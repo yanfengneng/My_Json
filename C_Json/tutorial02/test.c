@@ -7,6 +7,13 @@ static int main_ret = 0;
 static int test_count = 0;
 static int test_pass = 0;
 
+/*
+解释：
+    equality表示expect与actual是否相等，format用来打印错误信息
+    表示将测试文件的绝对路径、测试文件的代码行数、预期值、实际值给打印出来。
+    fprintf(stderr, "%s:%d: expect: " format " actual: " format "\n", __FILE__, __LINE__, expect, actual);
+    宏中的反斜线表示该行未结束，还会串接到下一行。
+*/
 #define EXPECT_EQ_BASE(equality, expect, actual, format) \
     do {\
         test_count++;\
@@ -18,9 +25,14 @@ static int test_pass = 0;
         }\
     } while(0)
 
+/* 
+使用这两个宏时，若 expect!=actual（预期值不等于实际值），便会输出错误信息。
+第一个宏是检测 json 文本串的，第二个宏是检测 json 浮点数的。
+ */
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 #define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%.17g")
 
+/* 测试 null 是否解析成功 */
 static void test_parse_null() {
     lept_value v;
     v.type = LEPT_FALSE;
@@ -28,6 +40,7 @@ static void test_parse_null() {
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
 }
 
+/* 测试 true 是否解析成功 */
 static void test_parse_true() {
     lept_value v;
     v.type = LEPT_FALSE;
@@ -35,6 +48,7 @@ static void test_parse_true() {
     EXPECT_EQ_INT(LEPT_TRUE, lept_get_type(&v));
 }
 
+/* 测试 false 是否解析成功 */
 static void test_parse_false() {
     lept_value v;
     v.type = LEPT_TRUE;
@@ -42,6 +56,7 @@ static void test_parse_false() {
     EXPECT_EQ_INT(LEPT_FALSE, lept_get_type(&v));
 }
 
+/* 测试数字是否解析成功。使用多行的宏的方式来减少重复代码。 */
 #define TEST_NUMBER(expect, json)\
     do {\
         lept_value v;\
@@ -50,6 +65,7 @@ static void test_parse_false() {
         EXPECT_EQ_DOUBLE(expect, lept_get_number(&v));\
     } while(0)
 
+/* 测试边界值 */
 static void test_parse_number() {
     TEST_NUMBER(0.0, "0");
     TEST_NUMBER(0.0, "-0");
@@ -82,7 +98,7 @@ static void test_parse_number() {
     TEST_NUMBER(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
-// 使用宏来将不合法的json值得相似代码简化掉
+/* 使用宏来将不合法的json值的相似代码简化掉 */
 #define TEST_ERROR(error, json)\
     do {\
         lept_value v;\
@@ -91,11 +107,13 @@ static void test_parse_number() {
         EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));\
     } while(0)
 
+/* 测试空白是否解析成功 */
 static void test_parse_expect_value() {
     TEST_ERROR(LEPT_PARSE_EXPECT_VALUE, "");
     TEST_ERROR(LEPT_PARSE_EXPECT_VALUE, " ");
 }
 
+/* 测试无效值是否解析成功 */
 static void test_parse_invalid_value() {
     TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "nul");
     TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "?");
@@ -111,6 +129,7 @@ static void test_parse_invalid_value() {
     TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "nan");
 }
 
+/* 测试空白之后还有字符的状态是否解析成功 */
 static void test_parse_root_not_singular() {
     TEST_ERROR(LEPT_PARSE_ROOT_NOT_SINGULAR, "null x");
 
@@ -120,11 +139,13 @@ static void test_parse_root_not_singular() {
     TEST_ERROR(LEPT_PARSE_ROOT_NOT_SINGULAR, "0x123");
 }
 
+/* 测试大数字是否能判断出错 */
 static void test_parse_number_too_big() {
     TEST_ERROR(LEPT_PARSE_NUMBER_TOO_BIG, "1e309");
     TEST_ERROR(LEPT_PARSE_NUMBER_TOO_BIG, "-1e309");
 }
 
+/* 测试所有的 json 解析函数 */
 static void test_parse() {
     test_parse_null();
     test_parse_true();
