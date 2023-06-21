@@ -11,6 +11,13 @@ static int main_ret = 0;
 static int test_count = 0;
 static int test_pass = 0;
 
+/*
+解释：
+    equality表示expect与actual是否相等，format用来打印错误信息
+    表示将测试文件的绝对路径、测试文件的代码行数、预期值、实际值给打印出来。
+    fprintf(stderr, "%s:%d: expect: " format " actual: " format "\n", __FILE__, __LINE__, expect, actual);
+    宏中的反斜线表示该行未结束，还会串接到下一行。
+*/
 #define EXPECT_EQ_BASE(equality, expect, actual, format) \
     do {\
         test_count++;\
@@ -22,6 +29,10 @@ static int test_pass = 0;
         }\
     } while(0)
 
+/* 
+使用这五个宏时，若 expect!=actual（预期值不等于实际值），便会输出错误信息。
+第一个宏是检测 json 文本串的，第二个宏是检测 json 浮点数的，第三个是检查 string 字符串的，第四个检查是否 true，第五个检查是否 false
+*/
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 #define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%.17g")
 #define EXPECT_EQ_STRING(expect, actual, alength) \
@@ -29,15 +40,17 @@ static int test_pass = 0;
 #define EXPECT_TRUE(actual) EXPECT_EQ_BASE((actual) != 0, "true", "false", "%s")
 #define EXPECT_FALSE(actual) EXPECT_EQ_BASE((actual) == 0, "false", "true", "%s")
 
+/* 测试 null 是否解析成功 */
 static void test_parse_null() {
     lept_value v;
-    lept_init(&v);
-    lept_set_boolean(&v, 0);
+    lept_init(&v);// 先初始化 v
+    lept_set_boolean(&v, 0);// 再设置 v 的类型为 false
     EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "null"));
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
-    lept_free(&v);
+    lept_free(&v);// 若 v 是字符串，就释放 v 的内存。然后将 v 的类型设置为 null
 }
 
+/* 测试 true 是否解析成功 */
 static void test_parse_true() {
     lept_value v;
     lept_init(&v);
@@ -47,6 +60,7 @@ static void test_parse_true() {
     lept_free(&v);
 }
 
+/* 测试 false 是否解析成功 */
 static void test_parse_false() {
     lept_value v;
     lept_init(&v);
@@ -56,6 +70,7 @@ static void test_parse_false() {
     lept_free(&v);
 }
 
+/* 测试数字是否解析成功。使用多行的宏的方式来减少重复代码 */
 #define TEST_NUMBER(expect, json)\
     do {\
         lept_value v;\
@@ -66,6 +81,7 @@ static void test_parse_false() {
         lept_free(&v);\
     } while(0)
 
+/* 测试边界值 */
 static void test_parse_number() {
     TEST_NUMBER(0.0, "0");
     TEST_NUMBER(0.0, "-0");
@@ -98,6 +114,7 @@ static void test_parse_number() {
     TEST_NUMBER(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
+/* 使用宏来测试字符串 */
 #define TEST_STRING(expect, json)\
     do {\
         lept_value v;\
@@ -108,6 +125,7 @@ static void test_parse_number() {
         lept_free(&v);\
     } while(0)
 
+/* 测试字符串 */
 static void test_parse_string() {
     TEST_STRING("", "\"\"");
     TEST_STRING("Hello", "\"Hello\"");
@@ -121,6 +139,7 @@ static void test_parse_string() {
     TEST_STRING("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");  /* G clef sign U+1D11E */
 }
 
+/* 使用宏来将不合法的 json 值的相似代码简化掉 */
 #define TEST_ERROR(error, json)\
     do {\
         lept_value v;\
@@ -131,11 +150,13 @@ static void test_parse_string() {
         lept_free(&v);\
     } while(0)
 
+/* 测试空白符 */ 
 static void test_parse_expect_value() {
     TEST_ERROR(LEPT_PARSE_EXPECT_VALUE, "");
     TEST_ERROR(LEPT_PARSE_EXPECT_VALUE, " ");
 }
 
+/* 测试无效值 */
 static void test_parse_invalid_value() {
     TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "nul");
     TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "?");
@@ -151,6 +172,7 @@ static void test_parse_invalid_value() {
     TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "nan");
 }
 
+/* 测试空白之后还有字符的状态是否解析成功 */
 static void test_parse_root_not_singular() {
     TEST_ERROR(LEPT_PARSE_ROOT_NOT_SINGULAR, "null x");
 
@@ -160,16 +182,19 @@ static void test_parse_root_not_singular() {
     TEST_ERROR(LEPT_PARSE_ROOT_NOT_SINGULAR, "0x123");
 }
 
+/* 测试大数字是否能判断出错 */
 static void test_parse_number_too_big() {
     TEST_ERROR(LEPT_PARSE_NUMBER_TOO_BIG, "1e309");
     TEST_ERROR(LEPT_PARSE_NUMBER_TOO_BIG, "-1e309");
 }
 
+/* 测试缺少引号是否成功 */
 static void test_parse_missing_quotation_mark() {
     TEST_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK, "\"");
     TEST_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK, "\"abc");
 }
 
+/* 测试无效字符串转义是否成功 */
 static void test_parse_invalid_string_escape() {
     TEST_ERROR(LEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\v\"");
     TEST_ERROR(LEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\'\"");
@@ -177,11 +202,13 @@ static void test_parse_invalid_string_escape() {
     TEST_ERROR(LEPT_PARSE_INVALID_STRING_ESCAPE, "\"\\x12\"");
 }
 
+/* 测试无效字符是否成功 */
 static void test_parse_invalid_string_char() {
     TEST_ERROR(LEPT_PARSE_INVALID_STRING_CHAR, "\"\x01\"");
     TEST_ERROR(LEPT_PARSE_INVALID_STRING_CHAR, "\"\x1F\"");
 }
 
+/* 测试无效的十六进制 Unicode 编码 */
 static void test_parse_invalid_unicode_hex() {
     TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u\"");
     TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u0\"");
@@ -198,6 +225,7 @@ static void test_parse_invalid_unicode_hex() {
     TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u 123\"");
 }
 
+/* 测试无效 unicode 代理 */
 static void test_parse_invalid_unicode_surrogate() {
     TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD800\"");
     TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uDBFF\"");
@@ -223,6 +251,7 @@ static void test_parse() {
     test_parse_invalid_unicode_surrogate();
 }
 
+/* 测试访问空 */
 static void test_access_null() {
     lept_value v;
     lept_init(&v);
@@ -232,6 +261,7 @@ static void test_access_null() {
     lept_free(&v);
 }
 
+/* 测试访问 bool 值 */
 static void test_access_boolean() {
     lept_value v;
     lept_init(&v);
@@ -243,6 +273,7 @@ static void test_access_boolean() {
     lept_free(&v);
 }
 
+/* 测试访问数字 */
 static void test_access_number() {
     lept_value v;
     lept_init(&v);
@@ -252,6 +283,7 @@ static void test_access_number() {
     lept_free(&v);
 }
 
+/* 测试访问字符串 */
 static void test_access_string() {
     lept_value v;
     lept_init(&v);

@@ -103,12 +103,13 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
     return LEPT_PARSE_OK;
 }
 
+/* 读 4 位 16 进制数字 */
 static const char* lept_parse_hex4(const char* p, unsigned* u) {
     int i;
     *u = 0;
     for (i = 0; i < 4; i++) {
-        char ch = *p++;
-        *u <<= 4;
+        char ch = *p++;// 当前字符
+        *u <<= 4;// 二进制左移四位，也就是乘以 16
         if      (ch >= '0' && ch <= '9')  *u |= ch - '0';
         else if (ch >= 'A' && ch <= 'F')  *u |= ch - ('A' - 10);
         else if (ch >= 'a' && ch <= 'f')  *u |= ch - ('a' - 10);
@@ -117,45 +118,48 @@ static const char* lept_parse_hex4(const char* p, unsigned* u) {
     return p;
 }
 
+/* 把码点编码成 utf-8 */
 static void lept_encode_utf8(lept_context* c, unsigned u) {
     if (u <= 0x7F) 
         PUTC(c, u & 0xFF);
     else if (u <= 0x7FF) {
-        PUTC(c, 0xC0 | ((u >> 6) & 0xFF));
-        PUTC(c, 0x80 | ( u       & 0x3F));
+        PUTC(c, 0xC0 | ((u >> 6) & 0xFF));// 取后六位之前的部分，然后补到1100 0000里面
+        PUTC(c, 0x80 | ( u       & 0x3F));// 取后六位，然后补到1000 0000里面
     }
     else if (u <= 0xFFFF) {
-        PUTC(c, 0xE0 | ((u >> 12) & 0xFF));
-        PUTC(c, 0x80 | ((u >>  6) & 0x3F));
-        PUTC(c, 0x80 | ( u        & 0x3F));
+        PUTC(c, 0xE0 | ((u >> 12) & 0xFF));// 取后十二位之前的部分，然后补到1110 0000里面
+        PUTC(c, 0x80 | ((u >>  6) & 0x3F));// 取后 6 位到 12 之间的部分，然后补到1000 0000里面
+        PUTC(c, 0x80 | ( u        & 0x3F));// 取后六位，然后补到1000 0000里面
     }
     else {
         assert(u <= 0x10FFFF);
-        PUTC(c, 0xF0 | ((u >> 18) & 0xFF));
+        PUTC(c, 0xF0 | ((u >> 18) & 0xFF));// 取后18位之前的部分，然后补到1111 0000里面
         PUTC(c, 0x80 | ((u >> 12) & 0x3F));
         PUTC(c, 0x80 | ((u >>  6) & 0x3F));
         PUTC(c, 0x80 | ( u        & 0x3F));
     }
 }
 
+/* 字符串错误宏 */
 #define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
 
 static int lept_parse_string(lept_context* c, lept_value* v) {
     size_t head = c->top, len;
     unsigned u, u2;
     const char* p;
-    EXPECT(c, '\"');
+    EXPECT(c, '\"');// 跳过字符串的第一个引号
     p = c->json;
     for (;;) {
-        char ch = *p++;
-        switch (ch) {
-            case '\"':
-                len = c->top - head;
-                lept_set_string(v, (const char*)lept_context_pop(c, len), len);
-                c->json = p;
-                return LEPT_PARSE_OK;
+        char ch = *p++;// 获得当前字符
+            switch (ch) {
+            case '\"':// 字符串的双引号
+                len = c->top - head;// 获得栈中字符串的长度
+                lept_set_string(v, (const char*)lept_context_pop(c, len), len);// 将字符串 c 复制到 v 中
+                c->json = p;// 更新 c 中字符串的起始位置
+                return LEPT_PARSE_OK;// 返回解析成功的标志
             case '\\':
                 switch (*p++) {
+                    // 9 种转义字符
                     case '\"': PUTC(c, '\"'); break;
                     case '\\': PUTC(c, '\\'); break;
                     case '/':  PUTC(c, '/' ); break;
@@ -165,7 +169,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                     case 'r':  PUTC(c, '\r'); break;
                     case 't':  PUTC(c, '\t'); break;
                     case 'u':
-                        if (!(p = lept_parse_hex4(p, &u)))
+                        if (!(p = lept_parse_hex4(p, &u)))// 若 p 不是4位16进制数，则返回无效十六进制 Unicode 的错误码
                             STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
                         if (u >= 0xD800 && u <= 0xDBFF) { /* surrogate pair */
                             if (*p++ != '\\')
@@ -185,7 +189,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                 }
                 break;
             case '\0':
-                STRING_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK);
+                STRING_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK);// 返回缺少引号状态
             default:
                 if ((unsigned char)ch < 0x20)
                     STRING_ERROR(LEPT_PARSE_INVALID_STRING_CHAR);
