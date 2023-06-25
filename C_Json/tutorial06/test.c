@@ -322,6 +322,7 @@ static void test_parse_miss_comma_or_square_bracket() {
     TEST_ERROR(LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[[]");
 }
 
+/* 测试丢失键 */
 static void test_parse_miss_key() {
     TEST_ERROR(LEPT_PARSE_MISS_KEY, "{:1,");
     TEST_ERROR(LEPT_PARSE_MISS_KEY, "{1:1,");
@@ -333,11 +334,13 @@ static void test_parse_miss_key() {
     TEST_ERROR(LEPT_PARSE_MISS_KEY, "{\"a\":1,");
 }
 
+/* 测试丢失冒号 */
 static void test_parse_miss_colon() {
     TEST_ERROR(LEPT_PARSE_MISS_COLON, "{\"a\"}");
     TEST_ERROR(LEPT_PARSE_MISS_COLON, "{\"a\",\"b\"}");
 }
 
+/* 测试丢失逗号或花括号 */
 static void test_parse_miss_comma_or_curly_bracket() {
     TEST_ERROR(LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET, "{\"a\":1");
     TEST_ERROR(LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET, "{\"a\":1]");

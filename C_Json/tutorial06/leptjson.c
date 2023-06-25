@@ -193,6 +193,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 
 static int lept_parse_value(lept_context* c, lept_value* v);
 
+/* 解析数组 */
 static int lept_parse_array(lept_context* c, lept_value* v) {
     size_t i, size = 0;
     int ret;
@@ -250,12 +251,13 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
         v->u.o.size = 0;
         return LEPT_PARSE_OK;
     }
+    /* 需要注意的是，要为 m.k 分配内存去存储键的字符串，若在整个对象解析时发生错误，也要记得释放栈中的 lept_member 的 k */
     m.k = NULL;
     size = 0;
     for (;;) {
         char* str;
         lept_init(&m.v);
-        /* parse key */
+        /* 1.parse key */
         if (*c->json != '"') {
             ret = LEPT_PARSE_MISS_KEY;
             break;
@@ -264,7 +266,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
             break;
         memcpy(m.k = (char*)malloc(m.klen + 1), str, m.klen);
         m.k[m.klen] = '\0';
-        /* parse ws colon ws */
+        /* 2.parse ws colon ws */
         lept_parse_whitespace(c);
         if (*c->json != ':') {
             ret = LEPT_PARSE_MISS_COLON;
@@ -272,13 +274,13 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
         }
         c->json++;
         lept_parse_whitespace(c);
-        /* parse value */
+        /* 3.parse value */
         if ((ret = lept_parse_value(c, &m.v)) != LEPT_PARSE_OK)
             break;
         memcpy(lept_context_push(c, sizeof(lept_member)), &m, sizeof(lept_member));
         size++;
         m.k = NULL; /* ownership is transferred to member on stack */
-        /* parse ws [comma | right-curly-brace] ws */
+        /* 4.parse ws [comma | right-curly-brace] ws */
         lept_parse_whitespace(c);
         if (*c->json == ',') {
             c->json++;
@@ -297,7 +299,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
             break;
         }
     }
-    /* Pop and free members on the stack */
+    /* 5.Pop and free members on the stack */
     free(m.k);
     for (i = 0; i < size; i++) {
         lept_member* m = (lept_member*)lept_context_pop(c, sizeof(lept_member));
@@ -354,7 +356,7 @@ void lept_free(lept_value* v) {
                 lept_free(&v->u.a.e[i]);
             free(v->u.a.e);
             break;
-        case LEPT_OBJECT:
+        case LEPT_OBJECT:/* 释放对象内存 */
             for (i = 0; i < v->u.o.size; i++) {
                 free(v->u.o.m[i].k);
                 lept_free(&v->u.o.m[i].v);
