@@ -3,5 +3,6 @@
     "files.associations": {
         "cerrno": "cpp"
     },
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "/home/yfn/code/json/1json-tutorial/tutorial06_answer",
 }
