@@ -32,6 +32,7 @@ static int test_pass = 0;
 /* 
 使用这五个宏时，若 expect!=actual（预期值不等于实际值），便会输出错误信息。
 第一个宏是检测 json 文本串的，第二个宏是检测 json 浮点数的，第三个是检查 string 字符串的，第四个检查是否 true，第五个检查是否 false
+memcmp(expect, actual, alength) 将字符串 expect 与字符串 actual 的前 alength 个字符进行比较：若相等则返回0；若前一个字符串大于后一个字符串，则返回值 > 0；若前一个字符串小于后一个字符串，则返回值 < 0 
 */
 #define EXPECT_EQ_INT(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%d")
 #define EXPECT_EQ_DOUBLE(expect, actual) EXPECT_EQ_BASE((expect) == (actual), expect, actual, "%.17g")
@@ -240,10 +241,11 @@ static void test_access_string() {
     lept_value v;
     lept_init(&v);// 初始化
     lept_set_string(&v, "", 0);// 设置空字符串
+    // (期望值，实际值，长度)
     EXPECT_EQ_STRING("", lept_get_string(&v), lept_get_string_length(&v));
     lept_set_string(&v, "Hello", 5);
     EXPECT_EQ_STRING("Hello", lept_get_string(&v), lept_get_string_length(&v));
-    lept_free(&v);
+    lept_free(&v);// 释放内存
 }
 
 static void test_parse() {

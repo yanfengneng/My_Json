@@ -37,6 +37,7 @@ enum {
 };
 
 /* 由于我们会检查 v 的类型，所以在调用所有函数之前，必须初始化该类型 */
+/* 用上 do { ... } while(0) 是为了把表达式转为语句，模仿无返回值的函数 */
 #define lept_init(v) do { (v)->type = LEPT_NULL; } while(0)
 
 /* 解析 json：该函数的返回值表示 json 字符串的解析结果，用 v 来保存 json 字符串解析出来的数据类型 */
@@ -51,10 +52,14 @@ lept_type lept_get_type(const lept_value* v);
 /* 将 v 的值变成 null 值 */
 #define lept_set_null(v) lept_free(v)
 
+/* 判断 v 的类型是否为 true */
 int lept_get_boolean(const lept_value* v);
+/* 根据 b 的值来设置 v 是 true 还是 false */
 void lept_set_boolean(lept_value* v, int b);
 
+/* 获得解析出来的数字 */
 double lept_get_number(const lept_value* v);
+/* 将浮点数 n 写入 v 中 */
 void lept_set_number(lept_value* v, double n);
 
 /* 获得解析出来的字符串 */

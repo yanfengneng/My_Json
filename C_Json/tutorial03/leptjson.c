@@ -16,37 +16,43 @@
 #define EXPECT(c, ch)       do { assert(*c->json == (ch)); c->json++; } while(0)
 #define ISDIGIT(ch)         ((ch) >= '0' && (ch) <= '9')
 #define ISDIGIT1TO9(ch)     ((ch) >= '1' && (ch) <= '9')
-// 判断字符串 c 中弹出来的字符是否和字符 ch 是相等的
+// 判断字符串 c 中压入的字符是否和字符 ch 是相等的
 #define PUTC(c, ch)         do { *(char*)lept_context_push(c, sizeof(char)) = (ch); } while(0)
 
 typedef struct {
     const char* json;
     char* stack;
-    size_t size, top;// size 表示当前堆栈的容量，top 表示栈顶的位置
+    size_t size, top;// size 表示当前堆栈的容量，top 表示栈顶的位置（由于 stack 会被扩展，因此不需要把 top 以指针的形式存储）
 }lept_context;
 
-/* 压入任意大小的数据 */
+/* 压栈：将数组压入栈中。压入任意大小的数据 */
 static void* lept_context_push(lept_context* c, size_t size) {
     void* ret;
     assert(size > 0);
+    // 若栈的大小不够，也就是栈顶的位置加上压入数据的大小大于等于当前栈的容量，需要扩展栈的容量
     if (c->top + size >= c->size) {
-        if (c->size == 0)// 若栈的大小为 0，则设置为初始值
+        if (c->size == 0)// 若栈的大小为 0，则将其容量设置为初始值
             c->size = LEPT_PARSE_STACK_INIT_SIZE;
+        // 栈顶的位置加上数据的大小大于等于栈的容量时，也就是栈的容量不够时，将栈以1.5倍大小进行扩展，也就是每次将栈的容量加上0.5倍，直到栈的容量能满足数据插入为止
         while (c->top + size >= c->size)// c->size >> 1 表示加上 0.5 倍
             c->size += c->size >> 1;  /* c->size * 1.5 */
+        // 现在将为 stack 分配大小为 c->size 的内存空间
         c->stack = (char*)realloc(c->stack, c->size);// c->stack 在初始化时为 NULL，realloc(NULL, size) 的行为是等价于 malloc(size) 的，所以不需要为第一次分配内存作特别处理。
     }
-    // ret 保留数组的起始指针
+    // ret 保留数据的起始指针，栈在内存空间的位置加上原来栈顶的大小，为压入数据的起始位置
     ret = c->stack + c->top;
-    // 移动栈顶位置
+    // 栈顶的新位置为原来栈顶位置加上数据的大小
     c->top += size;
     return ret;
 }
 
 /* 弹出任意大小的数据 */
 static void* lept_context_pop(lept_context* c, size_t size) {
-    assert(c->top >= size);// 栈顶必须小于数据大小，才能进行弹出
-    // 返回栈的起始指针
+    // assert(int expression)，若 expression = 0，则终止程序，并打印错误信息；若 expression != 0，则断言不会触发。
+    // 也就是说只有断言里面的表达式的结果为 true 时，则不会抛出异常；表示式的结果为 false 时，会抛出异常，并打印错误信息。
+    // 所以栈顶的位置只有大于等于数据的大小时，才能弹出 size 大小的数据
+    assert(c->top >= size);
+    // 返回栈顶的位置
     return c->stack + (c->top -= size);
 }
 
@@ -97,9 +103,9 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
     }
     errno = 0;
     /* 将 json 十进制数字转换为 double 型二进制数字 */
-    v->n = strtod(c->json, NULL);
+    v->u.n = strtod(c->json, NULL);
     /* 转换之后的数字太大，返回数字过大这个状态 */
-    if (errno == ERANGE && (v->n == HUGE_VAL || v->n == -HUGE_VAL))
+    if (errno == ERANGE && (v->u.n == HUGE_VAL || v->u.n == -HUGE_VAL))
         return LEPT_PARSE_NUMBER_TOO_BIG;
     v->type = LEPT_NUMBER; // 更新 json 类型
     c->json = p;// 更新字符串
@@ -110,7 +116,7 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
 static int lept_parse_string(lept_context* c, lept_value* v) {
     size_t head = c->top, len;
     const char* p;
-    EXPECT(c, '\"');// 跳过转义字符
+    EXPECT(c, '\"');// 跳过第一个双引号
     p = c->json;
     for (;;) {
         char ch = *p++;// 获得当前字符
@@ -151,7 +157,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
     }
 }
 
-/* 解析 josn 字符串 */
+/* 解析 josn 字符串的值 */
 static int lept_parse_value(lept_context* c, lept_value* v) {
     switch (*c->json) {
         case 't':  return lept_parse_literal(c, v, "true", LEPT_TRUE);
@@ -163,6 +169,7 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
     }
 }
 
+/* 解析 json 字符串 */
 int lept_parse(lept_value* v, const char* json) {
     lept_context c;
     int ret=0;// 初始化是个好习惯
@@ -193,7 +200,7 @@ void lept_free(lept_value* v) {
     assert(v != NULL);
     if (v->type == LEPT_STRING)// 当前值是字符串类型时，我们才释放内存
         free(v->u.s.s);
-    v->type = LEPT_NULL;// 然后将 v 的类型变为 null
+    v->type = LEPT_NULL;// 释放内存之后需要将它的类型变为 null，这样能避免重复释放
 }
 
 /* 获得 json 值的类型 */
@@ -245,9 +252,9 @@ void lept_set_string(lept_value* v, const char* s, size_t len) {
     // 清空 v 可能分配到的内存
     lept_free(v);
     // 然后申请内存，并将字符串 s 复制到 v 中，并设置 v 的类型为字符串
-    v->u.s.s = (char*)malloc(len + 1);
+    v->u.s.s = (char*)malloc(len + 1);// len+1 中的 1 是因为结尾空字符
     memcpy(v->u.s.s, s, len);
-    v->u.s.s[len] = '\0';
+    v->u.s.s[len] = '\0';// 补上结尾空字符
     v->u.s.len = len;
     v->type = LEPT_STRING;
 }
