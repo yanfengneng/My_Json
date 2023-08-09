@@ -140,7 +140,7 @@ static void lept_encode_utf8(lept_context* c, unsigned u) {
     }
 }
 
-/* 字符串错误宏 */
+/* 把返回错误码的处理抽取为宏，字符串错误宏 */
 #define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
 
 static int lept_parse_string(lept_context* c, lept_value* v) {
@@ -169,6 +169,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                     case 'r':  PUTC(c, '\r'); break;
                     case 't':  PUTC(c, '\t'); break;
                     case 'u':
+                        // 遇到\u转义时，调用lept_parse_hex4()来解析4位十六进制数字
                         if (!(p = lept_parse_hex4(p, &u)))// 若 p 不是4位16进制数，则返回无效十六进制 Unicode 的错误码
                             STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
                         if (u >= 0xD800 && u <= 0xDBFF) { /* surrogate pair */
@@ -182,6 +183,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                                 STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE);
                             u = (((u - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
                         }
+                        // 把码点编码成 utf-8，写进缓冲区
                         lept_encode_utf8(c, u);
                         break;
                     default:
