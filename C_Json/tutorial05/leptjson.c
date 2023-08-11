@@ -21,10 +21,11 @@
 typedef struct {
     const char* json;
     char* stack;
-    size_t size, top;
+    size_t size, top;// size 表示当前堆栈的容量，top 表示栈顶的位置
 }lept_context;
 
 /* 无论如何，在编程时都要考虑清楚变量的生命周期，特别是指针的生命周期。 */
+/* 压入任意大小的数据 */
 static void* lept_context_push(lept_context* c, size_t size) {
     void* ret;
     assert(size > 0);
@@ -40,11 +41,14 @@ static void* lept_context_push(lept_context* c, size_t size) {
     return ret;
 }
 
+/* 弹出任意大小的数据 */
 static void* lept_context_pop(lept_context* c, size_t size) {
     assert(c->top >= size);
+    // 返回栈顶的位置
     return c->stack + (c->top -= size);
 }
 
+/* 处理空白 */
 static void lept_parse_whitespace(lept_context* c) {
     const char *p = c->json;
     while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
@@ -52,6 +56,7 @@ static void lept_parse_whitespace(lept_context* c) {
     c->json = p;
 }
 
+/* 合并 false、true、null 的解析函数 */
 static int lept_parse_literal(lept_context* c, lept_value* v, const char* literal, lept_type type) {
     size_t i;
     EXPECT(c, literal[0]);
@@ -63,6 +68,7 @@ static int lept_parse_literal(lept_context* c, lept_value* v, const char* litera
     return LEPT_PARSE_OK;
 }
 
+/* 将十进制的数字转换为二进制的 double，使用标准库的 strtod() 函数来进行转换。 */
 static int lept_parse_number(lept_context* c, lept_value* v) {
     const char* p = c->json;
     if (*p == '-') p++;
@@ -91,6 +97,7 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
     return LEPT_PARSE_OK;
 }
 
+/* 读 4 位 16 进制数字 */
 static const char* lept_parse_hex4(const char* p, unsigned* u) {
     int i;
     *u = 0;
@@ -126,6 +133,7 @@ static void lept_encode_utf8(lept_context* c, unsigned u) {
     }
 }
 
+/* 把返回错误码的处理抽取为宏，字符串错误宏 */
 #define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
 
 static int lept_parse_string(lept_context* c, lept_value* v) {
@@ -188,10 +196,12 @@ static int lept_parse_value(lept_context* c, lept_value* v);
 static int lept_parse_array(lept_context* c, lept_value* v) {
     size_t i, size = 0;
     int ret;
-    EXPECT(c, '[');
-    lept_parse_whitespace(c);// 第一个解析空白
-    if (*c->json == ']') {
+    EXPECT(c, '[');// 处理数组的左括号，然后将 c 的 json 字符串右移一位
+    lept_parse_whitespace(c);// 第一个解析空白：在左括号之后处理空白
+    if (*c->json == ']') {// 遇到数组的右括号
+        // 字符串右移一位
         c->json++;
+        // 将 v 的类型设置为数组，大小设置为 0，数组元素设置为 null，并返回解析成功的状态
         v->type = LEPT_ARRAY;
         v->u.a.size = 0;
         v->u.a.e = NULL;
@@ -200,22 +210,27 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
     for (;;) {
         /* 简单说明的话，就是在循环中建立一个临时值（lept_value e），然后调用 lept_parse_value() 去把元素解析至这个临时值，完成后把临时值压栈。
         当遇到 ]，把栈内的元素弹出，分配内存，生成数组值。 */
-        lept_value e;
+        lept_value e;// 建立临时值
         lept_init(&e);
+        // 把元素解析到这个临时值
         if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK)
             break;
+        // 将临时值拷贝到 c 对应的栈上
         memcpy(lept_context_push(c, sizeof(lept_value)), &e, sizeof(lept_value));
-        size++;
-        lept_parse_whitespace(c);// 第二个解析空白
+        size++;// 元素个数加1
+        lept_parse_whitespace(c);// 第二个解析空白：在元素之后处理空白
         if (*c->json == ',') {
             c->json++;
-            lept_parse_whitespace(c);// 第三个解析空白
+            lept_parse_whitespace(c);// 第三个解析空白：在逗号之后处理空白
         }
         else if (*c->json == ']') {
             c->json++;
             v->type = LEPT_ARRAY;
             v->u.a.size = size;
+            // 数组的大小进行扩大
             size *= sizeof(lept_value);
+            // 有 malloc 就有对应的 free 来释放内存，这样避免内存泄漏
+            // 将大小为 size 的 c 中的字符串拷贝到 e 中，也就是从栈中拷贝大小为 size 的元素到 e 中，然后返回解析成功的状态
             memcpy(v->u.a.e = (lept_value*)malloc(size), lept_context_pop(c, size), size);
             return LEPT_PARSE_OK;
         }
@@ -232,6 +247,7 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
     return ret;
 }
 
+/* 解析 josn 字符串 */
 static int lept_parse_value(lept_context* c, lept_value* v) {
     switch (*c->json) {
         case 't':  return lept_parse_literal(c, v, "true", LEPT_TRUE);
@@ -244,6 +260,7 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
     }
 }
 
+/* 解析 josn 字符串 */
 int lept_parse(lept_value* v, const char* json) {
     lept_context c;
     int ret;
@@ -277,6 +294,7 @@ void lept_free(lept_value* v) {
             /* 对于数组，应该先把数组内的元素通过递归调用 lept_free() 释放，然后才释放本身的 v->u.a.e */
             for (i = 0; i < v->u.a.size; i++)
                 lept_free(&v->u.a.e[i]);
+            // 最后释放数组的内存
             free(v->u.a.e);
             break;
         default: break;
@@ -284,42 +302,50 @@ void lept_free(lept_value* v) {
     v->type = LEPT_NULL;
 }
 
+/* 获得 json 值的类型 */
 lept_type lept_get_type(const lept_value* v) {
     assert(v != NULL);
     return v->type;
 }
 
+/* 判断 v 的类型是否为 true */
 int lept_get_boolean(const lept_value* v) {
     assert(v != NULL && (v->type == LEPT_TRUE || v->type == LEPT_FALSE));
     return v->type == LEPT_TRUE;
 }
 
+/* 根据 b 的值来设置 v 是 true 还是 false */
 void lept_set_boolean(lept_value* v, int b) {
     lept_free(v);
     v->type = b ? LEPT_TRUE : LEPT_FALSE;
 }
 
+/* 获得解析出来的数字 */
 double lept_get_number(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_NUMBER);
     return v->u.n;
 }
 
+/* 将浮点数 n 写入 v 中 */
 void lept_set_number(lept_value* v, double n) {
     lept_free(v);
     v->u.n = n;
     v->type = LEPT_NUMBER;
 }
 
+/* 获得解析出来的字符串 */
 const char* lept_get_string(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_STRING);
     return v->u.s.s;
 }
 
+/* 获得解析出来的字符串长度 */
 size_t lept_get_string_length(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_STRING);
     return v->u.s.len;
 }
 
+/* 将字符串复制到 v 中 */
 void lept_set_string(lept_value* v, const char* s, size_t len) {
     assert(v != NULL && (s != NULL || len == 0));
     lept_free(v);
@@ -330,11 +356,13 @@ void lept_set_string(lept_value* v, const char* s, size_t len) {
     v->type = LEPT_STRING;
 }
 
+/* 获得数组中的元素个数 */
 size_t lept_get_array_size(const lept_value* v) {
     assert(v != NULL && v->type == LEPT_ARRAY);
     return v->u.a.size;
 }
 
+/* 根据索引访问数组中某个元素 */
 lept_value* lept_get_array_element(const lept_value* v, size_t index) {
     assert(v != NULL && v->type == LEPT_ARRAY);
     assert(index < v->u.a.size);

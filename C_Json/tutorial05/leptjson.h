@@ -21,6 +21,7 @@ typedef struct lept_value lept_value;
 */
 struct lept_value {
     union {
+        // size 是元素的个数，不是字节单位
         struct { lept_value* e; size_t size; }a;    /* array:  elements, element count */
         struct { char* s; size_t len; }s;           /* string: null-terminated string, string length */
         double n;                                   /* number */
@@ -47,12 +48,16 @@ enum {
 /* 由于我们会检查 v 的类型，所以在调用所有函数之前，必须初始化该类型 */
 #define lept_init(v) do { (v)->type = LEPT_NULL; } while(0)
 
+/* 解析 json：该函数的返回值表示 json 字符串的解析结果，用 v 来保存 json 字符串解析出来的数据类型 */
 int lept_parse(lept_value* v, const char* json);
 
+/* 释放 v 的内存 */
 void lept_free(lept_value* v);
 
+/* 获得解析出来的数据类型 */
 lept_type lept_get_type(const lept_value* v);
 
+/* 将 v 的值变成 null 值 */
 #define lept_set_null(v) lept_free(v)
 
 /* 判断 v 的类型是否为true */
