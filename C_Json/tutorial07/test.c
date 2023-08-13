@@ -369,7 +369,7 @@ static void test_parse() {
     test_parse_miss_comma_or_curly_bracket();
 }
 
-/* 先写测试：把一个 JSON 解析，然后再生成另一 JSON，逐字符比较两个 JSON 是否一模一样 */
+/* 往返测试：先把传入的 json 值解析成 v，然后根据 v 生成 json2，对比 json 与 json2 是否一模一样。 */
 #define TEST_ROUNDTRIP(json)\
     do {\
         lept_value v;\
