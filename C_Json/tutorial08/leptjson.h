@@ -7,6 +7,7 @@ typedef enum {
 	LEPT_NULL, LEPT_FALSE, LEPT_TRUE, LEPT_NUMBER, LEPT_STRING, LEPT_ARRAY, LEPT_OBJECT
 } lept_type;
 
+// 定义 key 值不存在的宏
 #define LEPT_KEY_NOT_EXIST ((size_t)-1)
 
 typedef struct lept_value lept_value;
