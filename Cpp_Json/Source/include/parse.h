@@ -6,6 +6,7 @@
 
 namespace miniJson
 {
+    /* 对 json 字符串的解析过程 */
     class Parse final
     {
     public:

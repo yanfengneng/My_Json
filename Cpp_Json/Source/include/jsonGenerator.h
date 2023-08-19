@@ -5,6 +5,7 @@
 
 namespace miniJson
 {
+    /* json 生成器 */
     class JsonGenerator final
     {
     public:

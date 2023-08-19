@@ -8,6 +8,7 @@
 
 namespace miniJson
 {
+    /* 实现对 json 值进行操作 */
     class JsonValue final
     {
     public:

@@ -71,7 +71,7 @@ namespace miniJson
         void remove_object_value(size_t index) noexcept;
         void clear_object() noexcept;
     private:
-        /* Json 类只提供接口，JsonValue 类复制实现该接口 */
+        /* Json 类只提供接口，JsonValue 类负责实现该接口 */
         std::unique_ptr<miniJson::JsonValue> v;
         friend bool operator==(const Json &lhs, const Json &rhs) noexcept;
         friend bool operator!=(const Json &lhs, const Json &rhs) noexcept;
