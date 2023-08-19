@@ -6,3 +6,5 @@
 4YuanHang_Json
 5MiniJson
 test
+build/
+googletest/
