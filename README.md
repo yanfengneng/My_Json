@@ -5,3 +5,12 @@
 该项目大致想法是先按照教程用 C 语言写一遍，然后使用 C++ 对项目进行重构。
 * C_Json（2023/6/25 已完成） 表示按照教程编写的 C 语言代码。
 * Cpp_Json（2023/6/26 准备启动） 表示使用 C++ 重构之前编写的 C 语言代码。
+
+***
+Cpp_Json 将 C_Json 中完成的 C 语言的 Json 库使用 C++ 进行封装与重写，这里主要封装了 5 个类，每个类都使用一个头文件与 .cpp 文件进行实现。解释如下：
+* Json 类主要是用提供外部调用的接口，而 JsonValue 是负责实现该接口的（避免内部数据暴露在外）。这里主要是使用一个 std::unique_ptr 的一个指针来实现接口与实现的分离，Json 类调用 JsonValue类的实现，Json 类提供给外部调用接口。
+* JsonException 类是将原 c 语言代码中的解析出来的错误信息进行封装，继承 `std::runtime_error` 来抛出异常信息。
+* JsonGenerator 类主要是用来实现 json 字符串的生成的。
+* Parse 类是用来解析 json 字符串的。
+  
+本项目使用 `gtest` 来做单元测试，主要参考[轻量级Json库](https://github.com/Syopain/Json) 、[MiniJson](https://github.com/zsmj2017/MiniJson) 。
