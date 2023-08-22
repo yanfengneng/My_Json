@@ -1,17 +1,20 @@
-#ifndef EXCEPTION_H__
-#define EXCEPTION_H__
+#ifndef JSON_EXCEPTION_H__
+#ifndef JSON_EXCEPTION_H__
 
+#include <string>
 #include <stdexcept>
 
-namespace miniJson 
+namespace yfn
 {
-    /* 异常类 */
-    class JsonException final : public std::runtime_error
+    namespace json
     {
-    public:
-        explicit JsonException(const std::string &errMsg) : runtime_error(errMsg) { }
-        const char* what() const noexcept override { return runtime_error::what(); }
-    };
+        /* 异常类 */
+        class Exception final : public std::logic_error
+        {
+        public:
+            Exception(const std::string& errMsg) : logic_error(errMsg) { }
+        };
+    }
 }
 
 #endif

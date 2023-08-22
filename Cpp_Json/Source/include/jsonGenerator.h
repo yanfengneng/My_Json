@@ -1,22 +1,24 @@
-#ifndef GENERATOR_H__
-#define GENERATOR_H__
+#ifndef JSON_GENERATOR_H__
+#define JSON_GENERATOR_H__
 
 #include "jsonValue.h"
 
-namespace miniJson
+namespace yfn
 {
-    /* json 生成器 */
-    class JsonGenerator final
+    namespace json
     {
-    public:
-        JsonGenerator(const JsonValue& val, std::string &result);
-    private:
-        void stringify_value(const JsonValue& v);       /* 生成 json 值 */
-        void stringify_string(const std::string &str);  /* 生成 json 字符串 */
+        /* json 生成器 */
+        class Generator final
+        {
+        public:
+            Generator(const Value& val, std::string& result);
+        private:
+            void stringify_value(const Value &v);
+            void stringify_string(const std::string &str);
 
-        std::string &res_;
-
-    };
-} // namespace miniJson
+            std::string &res_;
+        }
+    }
+} // namespace yfn
 
 #endif

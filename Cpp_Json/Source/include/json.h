@@ -1,23 +1,23 @@
 #ifndef JSON_H__
 #define JSON_H__
 
-namespace miniJson
+#include <memory>
+#include <string>
+
+namespace yfn
 {
-    enum JsonType : int{
-        Null,
-        True,
-        False,
-        Number,
-        String,
-        Array,
-        Object
-    };
+    namespace json
+    {
+        /* 枚举数据类型 */
+        enum type : int{Null, True, False, Number, String, Array, Object};
 
-    class JsonValue;// 前向声明：Json 类使用一个 std::unique_ptr 实现对 JsonValue 的访问
-
+        /* 前向声明 */
+        class Value;
+    } // namespace json
+    
+    /* Json 类负责提供接口，Value 类负责实现接口，Json 类通过调用一个 std::unique_ptr 的智能指针实现对 Value 的访问 */
     class Json final
     {
-    public:
         /* 解析 json 字符串 */
         void parse(const std::string &content, std::string &status) noexcept;
         void parse(const std::string &content);
@@ -34,13 +34,13 @@ namespace miniJson
         Json& operator=(Json &&rhs) noexcept;       // 赋值移动拷贝构造函数
         void swap(Json &rhs) noexcept;              // 交换
 
-        /* 对 null、false、true 的操作 */
+        /* 对 null、true、false 的操作 */
         int get_type() const noexcept;
         void set_null() noexcept;
         void set_boolean(bool b) noexcept;
         Json& operator=(bool b) noexcept { set_boolean(b); return *this; }
 
-        /* 对数字的操作 */
+        /* 对数字的操作*/
         double get_number() const noexcept;
         void set_number(double d) noexcept;
         Json& operator=(double d) noexcept { set_number(d); return *this; }
@@ -60,7 +60,7 @@ namespace miniJson
         void erase_array_element(size_t index, size_t count) noexcept;
         void clear_array() noexcept;
 
-        /* 对对象的操作 */
+        /* 对对象进行操作 */
         void set_object() noexcept;
         size_t get_object_size() const noexcept;
         const std::string& get_object_key(size_t index) const noexcept;
@@ -71,11 +71,13 @@ namespace miniJson
         void remove_object_value(size_t index) noexcept;
         void clear_object() noexcept;
     private:
-        /* Json 类只提供接口，JsonValue 类负责实现该接口 */
-        std::unique_ptr<miniJson::JsonValue> v;
+        /* Json 类只提供接口，Value 负责实现该接口 */
+        std::unique_ptr<json::Value> v;
+
+        /* 友元函数 */
         friend bool operator==(const Json &lhs, const Json &rhs) noexcept;
         friend bool operator!=(const Json &lhs, const Json &rhs) noexcept;
-    }
+    };
 
     bool operator==(const Json &lhs, const Json &rhs) noexcept;
     bool operator!=(const Json &lhs, const Json &rhs) noexcept;
