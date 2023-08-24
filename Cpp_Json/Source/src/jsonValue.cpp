@@ -83,6 +83,7 @@ namespace yfn
             assert(type_ == json::Number);
             return num_;
         }
+
         /* 设置 Value 中的数字 */
         void Value::set_number(double d) noexcept{
             free();
@@ -96,12 +97,13 @@ namespace yfn
             assert(type_ == type::String);
             return str_;
         }
+
         /* 设置 Value 中的字符串 */
         void Value::set_string(const std::string &str) noexcept{
             if(type_ == json::String)
                 str_ = str;
             else{
-                // 释放内存，然后
+                // 释放内存，然后重新设置字符串
                 free();
                 type_ = json::String;
                 new(&str_) std::string(str);
@@ -257,6 +259,7 @@ namespace yfn
             }
         }
 
+        // 两个 Value 值不相等
         bool operator!=(const Value &lhs, const Value &rhs) noexcept{
             return !(lhs == rhs);
         }
