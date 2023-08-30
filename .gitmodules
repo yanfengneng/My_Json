@@ -1,3 +1,0 @@
-[submodule "Cpp_Json/gtest"]
-	path = Cpp_Json/gtest
-	url = git@git.zhlh6.cn:google/googletest.git

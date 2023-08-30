@@ -1,56 +1,50 @@
 {
     "version": "2.0.0",
-    "tasks": [{
-            "label": "compile",// 与 launch.json 中的 label 要一样才能运行
-            // 多文件编译需要加上这行代码。因此统一下，不管是单文件还是多文件都加上这行代码。使用这行代码来防止编译报错。
-            "type": "shell",// 任务类型：shell相当于先打开shell再输入命令，所以args还会经过shell再解析一遍
-            "command": "gcc",// 要使用的编译器，c语言就是gcc，c++就是g++
+    "tasks": [
+        {
+            "label": "compile",
+            "type": "shell",
+            "command": "gcc",
             "args": [
-                "-g", //生成和调试有关的信息
-                //"${file}",
-                "${fileDirname}/*.c",// /写c++把 *.c 换成 *.cpp；linux中使用 / 来分割，windows中使用 \ 来分割。
-                //"${workspaceFolder}/*.c",
-                "-o",// 指定输出文件名，不加该参数则默认输出a.exe，Linux下默认a.out
-                // ${fileDirname}是一个变量，表示文件所在的目录路径；${fileBasenameNoExtension}是一个变量，表示文件的基本名称（不包括扩展名）。
+                "-g",
+                "${fileDirname}/*.c",
+                "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.out",
-                //"-Wall", // 开启额外警告
-                //"-static-libgcc",   // 静态链接libgcc
-                //"-fexec-charset=GBK",// 生成的程序使用GBK编码，不加这一条会导致Win下输出中文乱码
-                "-std=c11", // 使用c语言的标准
-                // "-std=c++11", // 语言标准，可根据自己的需要进行修改，写c++要换成c++的语言标准，比如c++11.14.17
-                // "-std=c++14", 
-                // "-std=c++17",
-                //"-lpthread" // 加入多线程编译选项，可删除
+                "-std=c11"
             ],
-            // "problemMatcher": {// 问题匹配器
-            //     "owner": "cpp",// 指定该问题匹配器与 C++ 文件或 C++ 语言相关联。
-            //     "fileLocation": [// 指定要匹配的文件位置。在这种情况下，它会查找相对于工作区根目录的文件。
-            //         "relative",
-            //         "${workspaceRoot}"
-            //     ],
-            //     "pattern": {
-            //         "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",// 用于匹配错误或警告消息的正则表达式模式
-            //         "file": 1,// 指定正则表达式模式中的第一个捕获分组（文件路径）对应于文件位置。
-            //         "line": 2,// 指定正则表达式模式中的第二个捕获分组（行号）对应于行号。
-            //         "column": 3,// 指定正则表达式模式中的第三个捕获分组（列号）对应于列号。
-            //         "severity": 4,// 指定正则表达式模式中的第四个捕获分组（严重性）对应于错误或警告的严重性。
-            //         "message": 5// 指定正则表达式模式中的第五个捕获分组（错误或警告消息）对应于错误或警告消息本身。
-            //     },
-            // },
-            "group": {// 定义了任务的分组。"kind": "build"指定了该任务属于构建（build）任务组。"isDefault": true指定了该任务为默认任务组。
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            }
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc 生成活动文件",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": [// 指定了问题匹配器，使用了$gcc这个引用
-                "$gcc" //捕捉编译时编译器在终端里显示的报错信息，将其显示在vscode的‘问题’面板里
-            ],
-            "presentation": {// 执行这个任务时的一些其他设定
-                "echo": true,//表示在执行任务时在终端要有输出
-                "reveal": "always",//执行任务时是否跳转到终端面板，可以为always，silent，never
-                "focus": false,//设为true后可以使执行task时焦点聚集在终端，但对编译来说，设为true没有意义，因为运行的时候才涉及到输入
-                //"panel": "new"//每次执行这个task时都新建一个终端面板，也可以设置为shared，共用一个面板，不过那样会出现‘任务将被终端重用’的提示，比较烦人
-                "panel": "new"
-            },
+            "detail": "调试器生成的任务。"
         }
     ]
 }
