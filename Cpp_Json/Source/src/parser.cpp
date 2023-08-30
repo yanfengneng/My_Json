@@ -57,7 +57,7 @@ namespace yfn
         }
 
         /* 合并 false、true、null 的解析函数 */
-        void Parser::parse_literal(const char *literal, json::type t);
+        void Parser::parse_literal(const char *literal, json::type t)
         {
             expect(cur_, literal[0]);
             size_t i;
@@ -71,7 +71,7 @@ namespace yfn
         }
 
         /* 解析数字 */
-        void Parser::parse_number();
+        void Parser::parse_number()
         {
             const char *p = cur_;
             // 处理负号
@@ -111,7 +111,7 @@ namespace yfn
         }
 
         /* 将之前解析字符串的函数拆分为两部分，是为了在解析 json 对象的 key 值时，不使用 lept_value 存储键，因为这样会浪费其中的 type 这个无用字段 */
-        void Parser::parse_string();
+        void Parser::parse_string()
         {
             std::string s;
             // 用临时值 s 来保存解析出来的字符串，然后将 s 赋值为 Value
@@ -122,7 +122,7 @@ namespace yfn
         /* 解析字符串 */
         void Parser::parse_string_raw(std::string &tmp)
         {
-            except(cur_, '\"');// 跳过字符串的第一个引号
+            expect(cur_, '\"');// 跳过字符串的第一个引号
             const char *p = cur_;
             unsigned u = 0, u2 = 0;
             while (*p != '\"')// 直到解析到字符串结尾，也就是第二个引号
@@ -133,14 +133,16 @@ namespace yfn
                 // 处理 9 种转义字符：当前字符是'\'，然后跳到下一个字符
                 if (*p == '\\' && ++p)
                 {
-                    case '\"': tmp += '\"'; break;
-                    case '\\': tmp += '\\'; break;
-                    case '/' : tmp += '/' ; break;
-                    case 'b' : tmp += 'b' ; break;
-                    case 'f' : tmp += 'f' ; break;
-                    case 'n' : tmp += 'n' ; break;
-                    case 'r' : tmp += 'r' ; break;
-                    case 't' : tmp += 't' ; break;
+                    switch (*p++)
+                    {
+                    case '\"': tmp += '\"' ; break;
+                    case '\\': tmp += '\\' ; break;
+                    case '/' : tmp += '/'  ; break;
+                    case 'b' : tmp += '\b' ; break;
+                    case 'f' : tmp += '\f' ; break;
+                    case 'n' : tmp += '\n' ; break;
+                    case 'r' : tmp += '\r' ; break;
+                    case 't' : tmp += '\t' ; break;
                     case 'u' :
                         // 遇到\u转义时，调用parse_hex4()来解析4位十六进制数字
                         parse_hex4(p, u);
@@ -158,9 +160,10 @@ namespace yfn
                         // 把码点编码成 utf-8，写进缓冲区
                         parse_encode_utf8(tmp, u);
                         break;  
-                    default : throw (Exception("parse invalid string escape!"));
+                    default : throw (Exception("parse invalid string escape"));
+                    }
                 }
-                else if ((unsigned char) *p < 0x20){
+                else if ((unsigned char) *p < 0x20) {
                     throw (Exception("parse invalid string char"));
                 }
                 else tmp += *p++;
@@ -183,12 +186,12 @@ namespace yfn
                     u |= ch - ('A' - 10);
                 else if (ch >= 'a' && ch <= 'f')
                     u |= ch - ('a' - 10);
-                else throw (Exception('parse invalid unicode hex'));
+                else throw (Exception("parse invalid unicode hex"));
             }
         }
 
         /* 把码点编码成 utf-8 */
-        void Parser::parse_encode_utf8(std::string &s, unsigned u) const noexcept
+        void Parser::parse_encode_utf8(std::string &str, unsigned u) const noexcept
         {
             if (u <= 0x7F)
                 str += static_cast<char> (u & 0xFF);
@@ -211,7 +214,7 @@ namespace yfn
         }
 
         /* 解析数组 */
-        void Parser::parse_array();
+        void Parser::parse_array()
         {
             expect(cur_, '[');// 处理数字的左括号，然后将当前字符的位置右移一位
             parse_whitespace();// 第一个解析空白：在左括号之后解析空白
@@ -256,7 +259,7 @@ namespace yfn
         }
 
         /* 解析对象 */
-        void Parser::parse_object();
+        void Parser::parse_object()
         {
             expect(cur_, '{'); // 先跳过左花括号
             parse_whitespace(); // 第一个解析空白：在左花括号之后处理空白

@@ -75,6 +75,7 @@ namespace yfn
                 std::vector<std::pair<std::string, Value>> obj_;
             };
             
+            friend bool operator==(const Value& lhs, const Value& rhs) noexcept;
         };
 
         /* 比较两个 json 值 */

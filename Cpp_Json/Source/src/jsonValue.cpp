@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <string>
 #include "jsonValue.h"
-#include "jsonParser.h"
+#include "parser.h"
 #include "jsonGenerator.h"
 
 namespace yfn
@@ -9,10 +9,11 @@ namespace yfn
     namespace json
     {
         /* 构造函数 */
-        Value& Value::operator=(const Value &rhs) noexcept;
+        Value& Value::operator=(const Value &rhs) noexcept
         {
             free();
             init(rhs);
+            return *this;
         }
 
         /* 析构函数 */
@@ -56,7 +57,7 @@ namespace yfn
 
         /* 解析 json 字符串 */
         void Value::parse(const std::string &content){
-            Parse(*this, content);
+            Parser(*this, content);
         }
 
         /* 序列化 json 字符串 */

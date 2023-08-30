@@ -1,5 +1,5 @@
 #ifndef PARSE_H__
-#ifndef PARSE_H__
+#define PARSE_H__
 
 #include "json.h"
 #include "jsonValue.h"

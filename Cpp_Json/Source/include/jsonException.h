@@ -1,5 +1,5 @@
 #ifndef JSON_EXCEPTION_H__
-#ifndef JSON_EXCEPTION_H__
+#define JSON_EXCEPTION_H__
 
 #include <string>
 #include <stdexcept>

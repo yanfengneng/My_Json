@@ -17,7 +17,7 @@ namespace yfn
             void stringify_string(const std::string &str);
 
             std::string &res_;
-        }
+        };
     }
 } // namespace yfn
 

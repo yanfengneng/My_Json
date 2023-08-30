@@ -18,6 +18,7 @@ namespace yfn
     /* Json 类负责提供接口，Value 类负责实现接口，Json 类通过调用一个 std::unique_ptr 的智能指针实现对 Value 的访问 */
     class Json final
     {
+    public:
         /* 解析 json 字符串 */
         void parse(const std::string &content, std::string &status) noexcept;
         void parse(const std::string &content);

@@ -8,7 +8,7 @@ namespace yfn
     {
         try{
             parse(content);
-            status = "parse ok!";
+            status = "parse ok";
         }catch (const json::Exception& msg){
             status = msg.what();
         }catch(...){
@@ -85,7 +85,7 @@ namespace yfn
 
     /* 对数组的操作 */
     void Json::set_array() noexcept{
-        v-> set_array(std::vector<json::Value {}>);
+    v-> set_array(std::vector<json::Value> {});
     }
 
     size_t Json::get_array_size() const noexcept{

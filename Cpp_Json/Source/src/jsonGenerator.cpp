@@ -1,5 +1,5 @@
 #include "jsonGenerator.h"
-
+#include <cassert>
 namespace yfn
 {
     namespace json
