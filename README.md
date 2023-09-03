@@ -1,11 +1,11 @@
 - [1. 前置知识](#1-前置知识)
   - [1.1 Git submodule 子模块的管理和使用](#11-git-submodule-子模块的管理和使用)
   - [1.2 编写 CMakeLists.txt 文件](#12-编写-cmakeliststxt-文件)
-- [2. 安装并编译项目](#2-安装并编译项目)
+- [2. 项目解释](#2-项目解释)
+- [3. 安装并编译项目](#3-安装并编译项目)
   - [下载项目](#下载项目)
   - [编译项目](#编译项目)
   - [运行测试文件](#运行测试文件)
-- [3. 项目解释](#3-项目解释)
 
 # 1. 前置知识
 ## 1.1 [Git submodule 子模块的管理和使用](https://www.jianshu.com/p/9000cd49822c)
@@ -23,25 +23,7 @@ git submodule update --remote
 ## 1.2 编写 CMakeLists.txt 文件
 可参考[cmake中多级CMakeLists.txt调用](https://blog.csdn.net/weixin_42700740/article/details/126364574)、[CMake 学习笔记](https://xiaoneng.blog.csdn.net/article/details/124545500)
 
-# 2. 安装并编译项目
-## 下载项目
-```bash
-git clone git@github.com:yanfengneng/My_Json.git
-```
-## 编译项目
-```bash
-cd Cpp_Json
-mkdir build && cd build
-cmake .. && make
-```
-## 运行测试文件
-```bash
-UnitTest/MiniJsonTest
-
-UnitTest/MiniJsonGTest
-```
-
-# 3. 项目解释
+# 2. 项目解释
 该 JSON 项目主要学习 [miloyip 的从 0 开始写一个 json 解析库](https://github.com/miloyip/json-tutorial)，学习过程持续更新中（2023/6/13）。
 
 `leptjson.h`、`leptjson.c` 是用来解析 json 文件的实现代码，`test.c` 是用来测试编写函数的正确性。
@@ -59,3 +41,20 @@ Cpp_Json 将 C_Json 中完成的 C 语言的 Json 库使用 C++ 进行封装与�
   
 本项目使用 `gtest` 来做单元测试，主要参考[轻量级Json库](https://github.com/Syopain/Json) 、[MiniJson](https://github.com/zsmj2017/MiniJson) 。
 
+# 3. 安装并编译项目
+## 下载项目
+```bash
+git clone git@github.com:yanfengneng/My_Json.git
+```
+## 编译项目
+```bash
+cd Cpp_Json
+mkdir build && cd build
+cmake .. && make
+```
+## 运行测试文件
+```bash
+UnitTest/MiniJsonTest
+
+UnitTest/MiniJsonGTest
+```
