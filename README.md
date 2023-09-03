@@ -1,3 +1,10 @@
+- [1. 项目解释](#1-项目解释)
+- [2. 安装并编译项目](#2-安装并编译项目)
+  - [下载项目](#下载项目)
+  - [编译项目](#编译项目)
+
+
+# 1. 项目解释
 该 JSON 项目主要学习 [miloyip 的从 0 开始写一个 json 解析库](https://github.com/miloyip/json-tutorial)，学习过程持续更新中（2023/6/13）。
 
 `leptjson.h`、`leptjson.c` 是用来解析 json 文件的实现代码，`test.c` 是用来测试编写函数的正确性。
@@ -14,3 +21,15 @@ Cpp_Json 将 C_Json 中完成的 C 语言的 Json 库使用 C++ 进行封装与�
 * Parse 类是用来解析 json 字符串的。
   
 本项目使用 `gtest` 来做单元测试，主要参考[轻量级Json库](https://github.com/Syopain/Json) 、[MiniJson](https://github.com/zsmj2017/MiniJson) 。
+
+# 2. 安装并编译项目
+## 下载项目
+```bash
+git clone git@github.com:yanfengneng/My_Json.git
+```
+## 编译项目
+```bash
+cd Cpp_Json
+mkdir build && cd build
+cmake .. && make
+```
