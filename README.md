@@ -2,6 +2,7 @@
 - [2. 安装并编译项目](#2-安装并编译项目)
   - [下载项目](#下载项目)
   - [编译项目](#编译项目)
+  - [运行测试文件](#运行测试文件)
 
 
 # 1. 项目解释
@@ -10,8 +11,8 @@
 `leptjson.h`、`leptjson.c` 是用来解析 json 文件的实现代码，`test.c` 是用来测试编写函数的正确性。
 
 该项目大致想法是先按照教程用 C 语言写一遍，然后使用 C++ 对项目进行重构。
-* C_Json（2023/6/25 已完成） 表示按照教程编写的 C 语言代码。
-* Cpp_Json（2023/6/26 准备启动） 表示使用 C++ 重构之前编写的 C 语言代码。
+* C_Json（2023/6/13~2023/6/25） 表示按照教程编写的 C 语言代码。
+* Cpp_Json（2023/6/26~2023/9/3） 表示使用 C++ 重构之前编写的 C 语言代码。
 
 ***
 Cpp_Json 将 C_Json 中完成的 C 语言的 Json 库使用 C++ 进行封装与重写，这里主要封装了 5 个类，每个类都使用一个头文件与 .cpp 文件进行实现。解释如下：
@@ -32,4 +33,10 @@ git clone git@github.com:yanfengneng/My_Json.git
 cd Cpp_Json
 mkdir build && cd build
 cmake .. && make
+```
+## 运行测试文件
+```bash
+UnitTest/MiniJsonTest
+
+UnitTest/MiniJsonGTest
 ```
