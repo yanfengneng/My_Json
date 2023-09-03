@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string.h>
-#include "/home/yfn/code/json/Cpp_Json/Source/include/json.h"
+#include "../Source/include/json.h"
 
 static int main_ret = 0;
 static int test_count = 0;

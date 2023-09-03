@@ -1,0 +1,3 @@
+[submodule "Cpp_Json/gtest"]
+	path = Cpp_Json/gtest
+	url = https://github.com/google/googletest.git
